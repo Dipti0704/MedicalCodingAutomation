@@ -1,8 +1,9 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, UploadFile, File, HTTPException
 from app.models.medical_input import MedicalTextInput
 from app.agents.analyzer_agent import AnalyzerAgent
 from app.agents.validator_agent import ValidatorAgent
 from app.agents.explanation_agent import ExplanationAgent
+from app.utils.file_extractor import extract_text, TesseractNotAvailable
 from fastapi.middleware.cors import CORSMiddleware
 
 
@@ -35,3 +36,14 @@ def analyze_text(input: MedicalTextInput):
         "analysis": analysis_result,
         "warnings": warnings
     }
+
+@app.post("/extract-text")
+async def extract_text_endpoint(file: UploadFile = File(...)):
+    file_bytes = await file.read()
+
+    try:
+        return extract_text(file.filename, file_bytes)
+    except TesseractNotAvailable as exc:
+        raise HTTPException(status_code=503, detail=str(exc))
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc))
