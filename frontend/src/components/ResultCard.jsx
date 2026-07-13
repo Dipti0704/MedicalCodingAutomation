@@ -23,6 +23,12 @@ export default function ResultCard({ title, codes }) {
           </div>
 
           <ConfidenceBar value={item.confidence} />
+
+          {item.explanation && (
+            <div className="explanation">
+              {item.explanation}
+            </div>
+          )}
         </div>
       ))}
     </div>

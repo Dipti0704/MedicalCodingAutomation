@@ -38,6 +38,17 @@ export default function Home() {
 
       {result && (
         <>
+          {result.warnings.length > 0 && (
+            <div className="card warnings-card">
+              <div className="section-title">Warnings</div>
+              {result.warnings.map((warning, index) => (
+                <div className="warning" key={index}>
+                  {warning}
+                </div>
+              ))}
+            </div>
+          )}
+
           <ResultCard
             title="ICD-10 Diagnosis Codes"
             codes={result.analysis.icd_codes}

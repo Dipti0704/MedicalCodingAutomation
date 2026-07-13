@@ -144,3 +144,32 @@ button:hover {
   font-size: 14px;
   color: #6b7280;
 }
+
+/* ---------- Explanation ---------- */
+.explanation {
+  font-size: 13px;
+  margin-top: 10px;
+  color: #475569;
+  background: #f8fafc;
+  border-left: 3px solid #2563eb;
+  padding: 8px 12px;
+  border-radius: 4px;
+}
+
+/* ---------- Warnings ---------- */
+.warnings-card {
+  border-left: 4px solid #f59e0b;
+}
+
+.warning {
+  font-size: 14px;
+  color: #92400e;
+  background: #fffbeb;
+  padding: 10px 14px;
+  border-radius: 8px;
+  margin-bottom: 10px;
+}
+
+.warning:last-child {
+  margin-bottom: 0;
+}
