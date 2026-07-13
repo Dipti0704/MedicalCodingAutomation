@@ -3,11 +3,11 @@ import csv
 INPUT_FILE = "../../datasets/raw/icd10cm_order_2026.txt"
 OUTPUT_FILE = "../../datasets/icd10_codes.csv"
 
-MAX_CODES = 3000
-
 codes = []
 
 with open(INPUT_FILE, "r", encoding="utf-8") as f:
+    next(f)  # skip header row (Order26 / POAexemptCode / Description)
+
     for line in f:
         line = line.strip()
 
@@ -27,14 +27,16 @@ with open(INPUT_FILE, "r", encoding="utf-8") as f:
         if not code[0].isalnum():
             continue
 
-        codes.append((code, description))
+        # The source file wraps some descriptions in literal quote characters
+        # (not CSV quoting) when the text itself contains a comma.
+        if description.startswith('"') and description.endswith('"'):
+            description = description[1:-1]
 
-        if len(codes) >= MAX_CODES:
-            break
+        codes.append((code, description))
 
 with open(OUTPUT_FILE, "w", newline="", encoding="utf-8") as csvfile:
     writer = csv.writer(csvfile)
     writer.writerow(["code", "description"])
     writer.writerows(codes)
 
-print(f"✅ Saved {len(codes)} ICD-10 codes to icd10_codes.csv")
+print(f"Saved {len(codes)} ICD-10 codes to icd10_codes.csv")

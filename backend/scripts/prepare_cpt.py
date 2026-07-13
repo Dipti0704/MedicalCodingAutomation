@@ -27,4 +27,4 @@ with open(OUTPUT_FILE, "w", newline="", encoding="utf-8") as csvfile:
     writer.writerow(["code", "description"])
     writer.writerows(procedures)
 
-print(f"✅ Saved {len(procedures)} CPT-like procedure codes to cpt_codes.csv")
+print(f"Saved {len(procedures)} CPT-like procedure codes to cpt_codes.csv")
