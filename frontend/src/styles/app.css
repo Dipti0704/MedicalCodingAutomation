@@ -67,6 +67,29 @@ textarea:focus {
   border-color: #2563eb;
 }
 
+/* ---------- File Upload ---------- */
+.file-upload {
+  margin-top: 12px;
+}
+
+.file-upload-label {
+  display: inline-block;
+  font-size: 13px;
+  font-weight: 500;
+  color: #2563eb;
+  cursor: pointer;
+}
+
+.file-upload-label input {
+  display: none;
+}
+
+.file-upload-error {
+  font-size: 13px;
+  color: #b91c1c;
+  margin-top: 6px;
+}
+
 /* ---------- Button ---------- */
 button {
   width: 100%;

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import Header from "../components/Header";
 import TextInput from "../components/TextInput";
+import FileUpload from "../components/FileUpload";
 import ResultCard from "../components/ResultCard";
 
 export default function Home() {
@@ -30,6 +31,7 @@ export default function Home() {
 
       <div className="card">
         <TextInput text={text} setText={setText} />
+        <FileUpload onExtracted={setText} />
 
         <button onClick={analyze}>
           {loading ? "Analyzing..." : "Analyze Clinical Notes"}
