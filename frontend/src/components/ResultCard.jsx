@@ -1,6 +1,12 @@
 import ConfidenceBar from "./ConfidenceBar";
 
-export default function ResultCard({ title, codes }) {
+const STATUS_LABELS = {
+  pending: "Pending review",
+  approved: "Approved",
+  rejected: "Rejected",
+};
+
+export default function ResultCard({ title, codes, onDecide }) {
   return (
     <div className="card">
       <div className="section-title">{title}</div>
@@ -9,8 +15,8 @@ export default function ResultCard({ title, codes }) {
         <div className="empty">No codes detected</div>
       )}
 
-      {codes.map((item, index) => (
-        <div className="result-item" key={index}>
+      {codes.map((item) => (
+        <div className="result-item" key={item.review_id}>
           <div className="code-row">
             <span className="code">{item.code}</span>
             <span className="confidence-badge">
@@ -29,6 +35,31 @@ export default function ResultCard({ title, codes }) {
               {item.explanation}
             </div>
           )}
+
+          <div className="review-row">
+            <span className={`status-badge status-${item.status}`}>
+              {STATUS_LABELS[item.status]}
+            </span>
+
+            <div className="review-actions">
+              <button
+                type="button"
+                className="approve-button"
+                disabled={item.status === "approved"}
+                onClick={() => onDecide(item.review_id, "approved")}
+              >
+                Approve
+              </button>
+              <button
+                type="button"
+                className="reject-button"
+                disabled={item.status === "rejected"}
+                onClick={() => onDecide(item.review_id, "rejected")}
+              >
+                Reject
+              </button>
+            </div>
+          </div>
         </div>
       ))}
     </div>

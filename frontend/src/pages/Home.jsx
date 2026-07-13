@@ -25,6 +25,31 @@ export default function Home() {
     setLoading(false);
   };
 
+  const decideReview = async (reviewId, status) => {
+    const res = await fetch(`http://127.0.0.1:8000/reviews/${reviewId}/decision`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ status }),
+    });
+
+    if (!res.ok) return;
+
+    setResult((prev) => {
+      const updateCodes = (codes) =>
+        codes.map((item) =>
+          item.review_id === reviewId ? { ...item, status } : item
+        );
+
+      return {
+        ...prev,
+        analysis: {
+          icd_codes: updateCodes(prev.analysis.icd_codes),
+          cpt_codes: updateCodes(prev.analysis.cpt_codes),
+        },
+      };
+    });
+  };
+
   return (
     <div className="container">
       <Header />
@@ -54,10 +79,12 @@ export default function Home() {
           <ResultCard
             title="ICD-10 Diagnosis Codes"
             codes={result.analysis.icd_codes}
+            onDecide={decideReview}
           />
           <ResultCard
             title="Procedure Codes"
             codes={result.analysis.cpt_codes}
+            onDecide={decideReview}
           />
         </>
       )}

@@ -196,3 +196,69 @@ button:hover {
 .warning:last-child {
   margin-bottom: 0;
 }
+
+/* ---------- Human Review ---------- */
+.review-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid #e5e7eb;
+}
+
+.status-badge {
+  font-size: 12px;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 20px;
+}
+
+.status-pending {
+  background: #f1f5f9;
+  color: #475569;
+}
+
+.status-approved {
+  background: #dcfce7;
+  color: #15803d;
+}
+
+.status-rejected {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+.review-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.review-actions button {
+  width: auto;
+  margin-top: 0;
+  padding: 6px 14px;
+  font-size: 13px;
+  border-radius: 8px;
+}
+
+.approve-button {
+  background: #16a34a;
+}
+
+.approve-button:hover {
+  background: #15803d;
+}
+
+.reject-button {
+  background: #dc2626;
+}
+
+.reject-button:hover {
+  background: #b91c1c;
+}
+
+.review-actions button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
