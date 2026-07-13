@@ -16,6 +16,7 @@ See [`docs/problem_statement.md`](docs/problem_statement.md) for the motivating 
   - `app/agents/explanation_agent.py` attaches a templated human-readable explanation to each suggested code (the default, always-available path).
   - `app/agents/llm_agent.py` optionally replaces that with an LLM-generated clinical justification when `ANTHROPIC_API_KEY` is set; falls back to the templated explanation automatically if the key is absent or the call fails.
   - `app/db.py` persists every analysis as a `sessions` row and each suggested code as a `code_reviews` row (SQLite, `backend/coding_reviews.db`, gitignored) — the human-in-the-loop audit trail described below.
+  - `app/graph/icd_hierarchy.py` derives a category-level ICD-10 hierarchy from the code strings themselves (e.g. `I25.2` belongs to category `I25`), and attaches sibling codes in the same category to each ICD-10 result as `related_codes` — a graph-augmented retrieval step described below.
   - `app/utils/csv_loader.py` loads the prepared datasets from `datasets/`.
   - `app/utils/file_extractor.py` extracts text from uploaded PDFs and images: native text extraction for born-digital PDFs (PyMuPDF), with an OCR fallback (pytesseract) for scanned PDF pages and image files. Exposed via `POST /extract-text`.
   - `backend/scripts/` are one-time ETL scripts that turn raw CMS/HCPCS source files in `datasets/raw/` into the `datasets/icd10_codes.csv` and `datasets/cpt_codes.csv` files the app reads at runtime.
@@ -30,6 +31,12 @@ See [`docs/problem_statement.md`](docs/problem_statement.md) for the motivating 
 - `GET /sessions/{session_id}` — returns the original note plus every code review and its current status, for audit/history purposes.
 
 No code is deleted or auto-finalized on rejection — the row is kept with `status = "rejected"` so the full decision trail is preserved.
+
+## Graph-augmented retrieval (ICD-10 hierarchy)
+
+Every ICD-10-CM result now comes back with `related_codes`: other codes in the same category (the code's characters before the decimal point), so a coder can see the full clinical family a match belongs to, not just the single code RAG happened to retrieve. This is a first, lightweight step toward the graph-based retrieval described in the original design discussion — it is **not** full GraphRAG (no graph database, no community detection, no LLM-generated community summaries). Real Excludes1/Excludes2, "code also", and CPT-bundling (NCCI) relationships require CMS's Tabular List and NCCI edit files, which aren't part of the current dataset; adding those would be the natural next step in this direction.
+
+**Data source caveat:** `datasets/raw/icd10cm_order_2026.txt` is CMS's *POA Exempt Codes list* (38,349 real, valid ICD-10-CM codes exempt from "present on admission" reporting), not the full ICD-10-CM Order File. It's a legitimate CMS dataset, but built for a different purpose — as a result, many categories are represented by only one or two codes instead of their full family, so `related_codes` will often be empty. Swapping in the true Order File (manually downloaded from [CMS's ICD-10 page](https://www.cms.gov/medicare/coding-billing/icd-10-codes), since their site blocks automated fetches) would give this feature much richer coverage.
 
 ## Optional: LLM-generated explanations
 
@@ -76,8 +83,9 @@ Without it, `/extract-text` still works for text-based PDFs and returns a clear 
 
 ## Known limitations
 
-- `datasets/cpt_codes.csv` is a placeholder (27 HCPCS rows), not a real CPT procedure code set.
+- `datasets/cpt_codes.csv` is a placeholder (27 HCPCS rows), not a real CPT procedure code set — there is no CPT-side graph yet for this reason, and note that full CPT (AMA) descriptions are copyrighted and typically require a license, unlike ICD-10-CM and HCPCS Level II which are public domain.
 - Each analysis returns at most one ICD-10 code and one CPT code per note (`top_k=1` in `VectorStore.search`).
-- FAISS index is rebuilt in memory on every backend restart — it is not persisted to disk.
+- FAISS index is rebuilt in memory on every backend restart — it is not persisted to disk. With the full 38,349-code ICD-10 dataset, this now takes roughly 2 minutes on startup, which makes disk persistence a much higher priority than before.
+- The ICD-10 dataset is sourced from CMS's POA Exempt list rather than the full Order File — see the graph-augmented retrieval section above for what that means for hierarchy coverage.
 - No authentication or multi-user support — the SQLite review log has no concept of who approved/rejected a code.
 - No automated tests yet.

@@ -36,6 +36,18 @@ export default function ResultCard({ title, codes, onDecide }) {
             </div>
           )}
 
+          {item.related_codes && item.related_codes.length > 0 && (
+            <div className="related-codes">
+              <div className="related-codes-title">Related codes in this category</div>
+              {item.related_codes.map((related) => (
+                <div className="related-code-row" key={related.code}>
+                  <span className="related-code">{related.code}</span>
+                  <span className="related-description">{related.description}</span>
+                </div>
+              ))}
+            </div>
+          )}
+
           <div className="review-row">
             <span className={`status-badge status-${item.status}`}>
               {STATUS_LABELS[item.status]}

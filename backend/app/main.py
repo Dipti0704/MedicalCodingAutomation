@@ -8,6 +8,7 @@ from app.agents.validator_agent import ValidatorAgent
 from app.agents.explanation_agent import ExplanationAgent
 from app.agents.llm_agent import LLMReasoningAgent
 from app.utils.file_extractor import extract_text, TesseractNotAvailable
+from app.graph.icd_hierarchy import get_icd_hierarchy
 from fastapi.middleware.cors import CORSMiddleware
 from app import db
 
@@ -26,6 +27,7 @@ analyzer = AnalyzerAgent()
 validator = ValidatorAgent()
 explainer = ExplanationAgent()
 llm_agent = LLMReasoningAgent()
+icd_hierarchy = get_icd_hierarchy()
 
 db.init_db()
 
@@ -55,7 +57,14 @@ def analyze_text(input: MedicalTextInput):
         for code_item in analysis_result[key]:
             code_item = {**code_item, "explanation": build_explanation(input.text, code_type, code_item)}
             review_id = db.add_code_review(session_id, code_type, code_item)
-            explained_codes.append({**code_item, "review_id": review_id, "status": "pending"})
+
+            related_codes = (
+                icd_hierarchy.get_related_codes(code_item["code"]) if code_type == "icd" else []
+            )
+
+            explained_codes.append(
+                {**code_item, "review_id": review_id, "status": "pending", "related_codes": related_codes}
+            )
 
         analysis_result[key] = explained_codes
 
